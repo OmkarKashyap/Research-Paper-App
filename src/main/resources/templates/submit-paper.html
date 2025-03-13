@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Paper - Research Paper Conference</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container container">
+            <a href="/" class="navbar-brand">Research Conference</a>
+            <ul class="navbar-nav">
+                <li><a href="/dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="/submit-paper.html" class="nav-link">Submit Paper</a></li>
+                <li><a href="/profile.html" class="nav-link">Profile</a></li>
+                <li><a href="#" class="nav-link" onclick="logout()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <h2 class="card-title">Submit a Paper</h2>
+            <div id="success-message" class="alert alert-success" style="display: none;"></div>
+            <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+
+            <form id="paper-form">
+                <div class="form-group">
+                    <label for="title" class="form-label">Paper Title</label>
+                    <input type="text" id="title" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="abstract" class="form-label">Abstract</label>
+                    <textarea id="abstract" class="form-control" rows="5" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="content" class="form-label">Paper Content</label>
+                    <textarea id="content" class="form-control" rows="15" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="conference" class="form-label">Conference</label>
+                    <select id="conference" class="form-control" required>
+                        <option value="">Select a conference</option>
+                        <!-- Conference options will be loaded dynamically -->
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="file" class="form-label">Upload PDF (Optional)</label>
+                    <input type="file" id="file" class="form-control" accept=".pdf">
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary">Submit Paper</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+</body>
+</html> 

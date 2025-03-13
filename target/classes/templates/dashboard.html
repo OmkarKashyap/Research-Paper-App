@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Research Paper Conference</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container container">
+            <a href="/" class="navbar-brand">Research Conference</a>
+            <ul class="navbar-nav">
+                <li><a href="/dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="/submit-paper.html" class="nav-link">Submit Paper</a></li>
+                <li><a href="/profile.html" class="nav-link">Profile</a></li>
+                <li><a href="#" class="nav-link" onclick="logout()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="success-message" class="alert alert-success" style="display: none;"></div>
+        <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+
+        <div class="card">
+            <h2 class="card-title">Welcome to Your Dashboard</h2>
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <h3>Your Papers</h3>
+                    <p id="papers-count">Loading...</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Upcoming Conferences</h3>
+                    <p id="conferences-count">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Your Papers</h2>
+            <div class="paper-list">
+                <!-- Papers will be loaded dynamically -->
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Upcoming Conferences</h2>
+            <div class="conference-list">
+                <!-- Conferences will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/main.js"></script>
+</body>
+</html> 
