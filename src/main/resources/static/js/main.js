@@ -14,7 +14,8 @@ async function login(email, password) {
         const data = await response.json();
         if (response.ok) {
             localStorage.setItem('user', JSON.stringify(data));
-            window.location.href = '/dashboard.html';
+            // Redirect to search page after login
+            window.location.href = '/search-button.html';
         } else {
             showError(data.message);
         }
@@ -159,8 +160,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Load papers on dashboard
-    if (window.location.pathname === '/dashboard.html') {
+    // Load papers on dashboard if user is logged in
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (window.location.pathname === '/' && user.token) {
         loadPapers();
     }
 }); 

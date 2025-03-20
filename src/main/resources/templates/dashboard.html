@@ -3,55 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Research Paper Conference</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>Research Paper Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .hero-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .hero-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        .btn-action {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+        .btn-login {
+            background-color: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+        .btn-login:hover {
+            background-color: white;
+            color: #3498db;
+        }
+        .btn-register {
+            background-color: white;
+            border: none;
+            color: #3498db;
+        }
+        .btn-register:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        .features-section {
+            padding: 50px 0;
+        }
+        .feature-card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .feature-icon {
+            font-size: 2.5rem;
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+        .user-section {
+            display: none;
+            padding: 20px;
+        }
+        .paper-list {
+            display: none;
+        }
+        .welcome-message {
+            display: none;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="navbar-container container">
-            <a href="/" class="navbar-brand">Research Conference</a>
-            <ul class="navbar-nav">
-                <li><a href="/dashboard.html" class="nav-link">Dashboard</a></li>
-                <li><a href="/submit-paper.html" class="nav-link">Submit Paper</a></li>
-                <li><a href="/profile.html" class="nav-link">Profile</a></li>
-                <li><a href="#" class="nav-link" onclick="logout()">Logout</a></li>
-            </ul>
+    <div class="hero-section">
+        <div class="container">
+            <h1 class="hero-title">Research Paper Management System</h1>
+            <p class="hero-subtitle">A platform for researchers to submit, review, and collaborate on academic papers</p>
+            <div id="guest-buttons" class="action-buttons">
+                <a href="/login.html" class="btn btn-action btn-login">Login</a>
+                <a href="/register.html" class="btn btn-action btn-register">Register</a>
+            </div>
+            <div id="user-buttons" class="action-buttons" style="display: none;">
+                <button class="btn btn-action btn-login" onclick="logout()">Logout</button>
+                <a href="/submit-paper.html" class="btn btn-action btn-register">Submit Paper</a>
+            </div>
         </div>
-    </nav>
+    </div>
 
     <div class="container">
-        <div id="success-message" class="alert alert-success" style="display: none;"></div>
-        <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+        <div id="welcome-message" class="welcome-message">
+            <h2>Welcome back, <span id="user-name"></span>!</h2>
+        </div>
 
-        <div class="card">
-            <h2 class="card-title">Welcome to Your Dashboard</h2>
-            <div class="dashboard-stats">
-                <div class="stat-card">
-                    <h3>Your Papers</h3>
-                    <p id="papers-count">Loading...</p>
+        <div id="guest-features" class="features-section">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <div class="feature-icon">📝</div>
+                        <h3>Submit Papers</h3>
+                        <p>Easily submit your research papers and track their status</p>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <h3>Upcoming Conferences</h3>
-                    <p id="conferences-count">Loading...</p>
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <div class="feature-icon">👥</div>
+                        <h3>Collaborate</h3>
+                        <p>Connect with other researchers and work together</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card text-center">
+                        <div class="feature-icon">📊</div>
+                        <h3>Track Progress</h3>
+                        <p>Monitor your paper's review status and get feedback</p>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="card">
-            <h2 class="card-title">Your Papers</h2>
+        <div id="user-content" class="features-section" style="display: none;">
+            <h2 class="text-center mb-4">Your Papers</h2>
             <div class="paper-list">
-                <!-- Papers will be loaded dynamically -->
-            </div>
-        </div>
-
-        <div class="card">
-            <h2 class="card-title">Upcoming Conferences</h2>
-            <div class="conference-list">
-                <!-- Conferences will be loaded dynamically -->
+                <!-- Papers will be loaded here -->
             </div>
         </div>
     </div>
 
     <script src="/js/main.js"></script>
+    <script>
+        function checkAuth() {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user.token) {
+                document.getElementById('guest-buttons').style.display = 'none';
+                document.getElementById('user-buttons').style.display = 'flex';
+                document.getElementById('guest-features').style.display = 'none';
+                document.getElementById('user-content').style.display = 'block';
+                document.getElementById('welcome-message').style.display = 'block';
+                document.getElementById('user-name').textContent = user.name || 'User';
+            } else {
+                document.getElementById('guest-buttons').style.display = 'flex';
+                document.getElementById('user-buttons').style.display = 'none';
+                document.getElementById('guest-features').style.display = 'block';
+                document.getElementById('user-content').style.display = 'none';
+                document.getElementById('welcome-message').style.display = 'none';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.reload();
+        }
+
+        // Check authentication status when page loads
+        document.addEventListener('DOMContentLoaded', checkAuth);
+    </script>
 </body>
 </html> 
