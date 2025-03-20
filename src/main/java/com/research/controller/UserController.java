@@ -5,6 +5,7 @@ import com.research.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -23,7 +24,20 @@ public class UserController {
     }
 
     @GetMapping("/{email}")
-    public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
-        return ResponseEntity.ok(userService.findByEmail(email));
+    public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
+        Optional<User> user = userService.findByEmail(email);
+        return user.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> authenticateUser(@RequestBody User user) {
+        Optional<User> existingUser = userService.findByEmail(user.getEmail());
+
+        if (existingUser.isPresent() && existingUser.get().getPassword().equals(user.getPassword())) {
+            return ResponseEntity.ok(existingUser.get());
+        } else {
+            return ResponseEntity.badRequest().body("Invalid credentials. Please register.");
+        }
     }
 }
