@@ -66,7 +66,7 @@ public class PaperService {
     }
 
     public Map<String, Object> searchPapers(String topic) {
-        String url = API_URL + topic;
+        String url = API_URL + topic + "&fields=title,venue,url,abstract,year,citationCount,influentialCitationCount,authors,publicationDate,openAccessPdf";
         
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<String> entity = new HttpEntity<>(headers);
@@ -82,7 +82,6 @@ public class PaperService {
             for (int i = 0; i < data.length(); i++) {
                 JSONObject paperJson = data.getJSONObject(i);
                 Paper paper = new Paper();
-                
                 paper.setId(paperJson.optString("paperId"));
                 paper.setTitle(paperJson.optString("title"));
                 paper.setAbstractText(paperJson.optString("abstract"));
@@ -93,7 +92,7 @@ public class PaperService {
                 
                 // Extract open access PDF link if available
                 JSONObject openAccessPdf = paperJson.optJSONObject("openAccessPdf");
-                if (openAccessPdf != null) {
+                if (openAccessPdf != null && openAccessPdf.has("url")) {
                     paper.setPdfUrl(openAccessPdf.optString("url"));
                 }
                 
@@ -110,10 +109,7 @@ public class PaperService {
                 papers.add(paper);
             }
         }
-        System.out.println("Fetched Papers for topic: " + topic);
-        for (Paper p : papers) {
-            System.out.println(p);
-        }
+
         paperRepository.saveAll(papers);
         result.put("data", papers);
         return result;

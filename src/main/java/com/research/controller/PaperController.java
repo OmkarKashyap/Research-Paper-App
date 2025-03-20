@@ -63,7 +63,7 @@ public class PaperController {
 
     @GetMapping("/search")
     public Map<String, Object> searchPapers(@RequestParam String topic) {
-        System.out.println("Hello");
+        // System.out.println("Hello");
         return paperService.searchPapers(topic);
     }
 

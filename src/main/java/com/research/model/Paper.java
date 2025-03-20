@@ -57,10 +57,10 @@ public class Paper {
     @Column(name = "citation_count")
     private int citationCount;
     
-    @Column(name = "pdf_url")
+    @Column(name = "pdf_url", length = 500)
     private String pdfUrl;
     
-    @Column(name = "authors")
+    @Column(name = "authors", length = 1000)
     private String authors; // Storing as a comma-separated string for simplicity
 
     // **Constructors**
