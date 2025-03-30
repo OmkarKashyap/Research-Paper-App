@@ -4,6 +4,7 @@ import com.research.model.User;
 import com.research.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
@@ -13,8 +14,14 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        if (userService.findByEmail(user.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email is already registered.");
+        }
         return ResponseEntity.ok(userService.registerUser(user));
     }
 
@@ -34,10 +41,10 @@ public class UserController {
     public ResponseEntity<?> authenticateUser(@RequestBody User user) {
         Optional<User> existingUser = userService.findByEmail(user.getEmail());
 
-        if (existingUser.isPresent() && existingUser.get().getPassword().equals(user.getPassword())) {
+        if (existingUser.isPresent() && passwordEncoder.matches(user.getPassword(), existingUser.get().getPassword())) {
             return ResponseEntity.ok(existingUser.get());
         } else {
-            return ResponseEntity.badRequest().body("Invalid credentials. Please register.");
+            return ResponseEntity.badRequest().body("Invalid credentials. Please try again.");
         }
     }
 }
