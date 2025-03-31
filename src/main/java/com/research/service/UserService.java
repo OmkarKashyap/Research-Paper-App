@@ -36,7 +36,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // ✅ Add methods to get email and password for a specific user
     public String getUserEmail(Long userId) {
         return userRepository.findById(userId)
                 .map(User::getEmail)
