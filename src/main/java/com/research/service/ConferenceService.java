@@ -13,21 +13,21 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class PaperService {
+public class ConferenceService {
 
     private final RestTemplate restTemplate;
 
     private final String supabaseUrl = "https://pnodilhotdaenfongojd.supabase.co/rest/v1";
     private final String supabaseApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBub2RpbGhvdGRhZW5mb25nb2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMzOTE0MzAsImV4cCI6MjA1ODk2NzQzMH0.t181IckYFVqjpk9IvdlkB3rLmzfaURlMA5GpgDkBI7g";
 
-    public PaperService() {
+    public ConferenceService() {
         this.restTemplate = new RestTemplate();
     }
 
-    public Map<String, Object> getAllPapers() {
+    public Map<String, Object> getAllConferences() {
         Map<String, Object> result = new HashMap<>();
         try {
-            String url = supabaseUrl + "/papers";
+            String url = supabaseUrl + "/conferences";
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("apikey", supabaseApiKey);
@@ -44,19 +44,19 @@ public class PaperService {
                     new ParameterizedTypeReference<>() {
                     });
 
-            List<Map<String, Object>> papers = response.getBody();
-            result.put("data", papers);
-            result.put("total", papers != null ? papers.size() : 0);
+            List<Map<String, Object>> conferences = response.getBody();
+            result.put("data", conferences);
+            result.put("total", conferences != null ? conferences.size() : 0);
         } catch (Exception e) {
             result.put("error", "An error occurred: " + e.getMessage());
         }
         return result;
     }
 
-    public Map<String, Object> searchPapers(String topic) {
+    public Map<String, Object> searchConferences(String keyword) {
         Map<String, Object> result = new HashMap<>();
         try {
-            String url = supabaseUrl + "/papers?topic=ilike.%25" + topic + "%25&select=*";
+            String url = supabaseUrl + "/conferences?title=ilike.%25" + keyword + "%25&select=*";
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("apikey", supabaseApiKey);
@@ -73,9 +73,9 @@ public class PaperService {
                     new ParameterizedTypeReference<>() {
                     });
 
-            List<Map<String, Object>> papers = response.getBody();
-            result.put("data", papers);
-            result.put("total", papers != null ? papers.size() : 0);
+            List<Map<String, Object>> conferences = response.getBody();
+            result.put("data", conferences);
+            result.put("total", conferences != null ? conferences.size() : 0);
         } catch (Exception e) {
             result.put("error", "An error occurred: " + e.getMessage());
         }

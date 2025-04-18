@@ -12,6 +12,7 @@ async function login(email, password) {
             body: JSON.stringify({ email, password }),
         });
         const data = await response.json();
+        console.log('Login response:', data); // Debugging
         if (response.ok) {
             localStorage.setItem('user', JSON.stringify(data));
             window.location.href = '/dashboard.html';
@@ -23,7 +24,6 @@ async function login(email, password) {
     }
 }
 
-// Paper submission
 async function submitPaper(paperData) {
     try {
         const response = await fetch(`${API_BASE_URL}/papers`, {
@@ -49,33 +49,163 @@ async function submitPaper(paperData) {
 // Load papers
 async function loadPapers() {
     try {
-        const response = await fetch(`${API_BASE_URL}/papers`, {
+        console.log(`${API_BASE_URL}/papers/all`);
+        console.log(getToken());
+        const response = await fetch(`${API_BASE_URL}/papers/all`, {
             headers: {
                 'Authorization': `Bearer ${getToken()}`,
             },
         });
-        const papers = await response.json();
-        displayPapers(papers);
+        const result = await response.json();
+        console.log(result);
+        if (result.data) {
+            displayPapers(result.data);
+        } else {
+            showError('No papers found');
+        }
     } catch (error) {
         showError('An error occurred while loading papers');
+    }
+}
+
+async function loadConferences() {
+    try {
+        console.log(`${API_BASE_URL}/conferences/all`);
+        const response = await fetch(`${API_BASE_URL}/conferences/all`, {
+            headers: {
+                'Authorization': `Bearer ${getToken()}`,
+            },
+        });
+        const result = await response.json();
+        console.log(result);
+        if (result.data) {
+            displayConferences(result.data);
+        } else {
+            showError('No conferences found');
+        }
+    } catch (error) {
+        showError('An error occurred while loading conferences');
+    }
+}
+
+async function searchPapers(topic) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/papers/search?topic=${encodeURIComponent(topic)}`, {
+            headers: {
+                'Authorization': `Bearer ${getToken()}`,
+            },
+        });
+        const result = await response.json();
+        if (response.data) {
+            displayPapers(result.data);
+        } else {
+            showError('No papers found for the given topic');
+        }
+    } catch (error) {
+        showError('An error occurred while searching for papers');
     }
 }
 
 // Display papers in the UI
 function displayPapers(papers) {
     const paperList = document.querySelector('.paper-list');
-    if (!paperList) return;
+    if (!paperList) {
+        console.error('Paper list element not found');
+        return;
+    }
 
-    paperList.innerHTML = papers.map(paper => `
+    if (!papers || papers.length === 0) {
+        paperList.innerHTML = '<p>No papers found.</p>';
+        return;
+    }
+
+    // Limit to a maximum of 2 papers
+    const limitedPapers = papers.slice(0, 10);
+    
+    paperList.innerHTML = limitedPapers.map(paper => `
         <div class="paper-card">
-            <h3 class="paper-title">${paper.title}</h3>
+            <h3 class="paper-title">${paper.title || 'Untitled'}</h3>
             <div class="paper-meta">
-                <span>Author: ${paper.author.name}</span>
-                <span>Submitted: ${new Date(paper.submissionDate).toLocaleDateString()}</span>
+                <span><strong>Author:</strong> ${paper.authors|| 'Unknown'}</span>
+                <span><strong>Submitted:</strong> ${paper.published_date}</span>
             </div>
-            <p>${paper.abstract_}</p>
+           <p>${(paper.summary || 'No abstract available').slice(0, 100)}...</p>
             <div class="mt-3">
-                <button class="btn btn-primary" onclick="viewPaper(${paper.paperId})">View Details</button>
+                <button class="btn btn-primary" onclick="viewPaper(${paper.paperId || 0})">View Details</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function filterPapers(papers) {
+    const paperList = document.querySelector('.paper-list');
+    if (!paperList) {
+        console.error('Paper list element not found');
+        return;
+    }
+
+    if (!papers || papers.length === 0) {
+        paperList.innerHTML = '<p>No papers found.</p>';
+        return;
+    }
+
+    const titleFilter = document.getElementById('filter-title').value.toLowerCase();
+    const authorFilter = document.getElementById('filter-author').value.toLowerCase();
+    const statusFilter = document.getElementById('filter-status').value;
+
+    // Filter papers based on user input
+    const filteredPapers = papers.filter(paper => {
+        const titleMatch = paper.title.toLowerCase().includes(titleFilter);
+        const authorMatch = paper.authors.toLowerCase().includes(authorFilter);
+        const statusMatch = !statusFilter || paper.status.toLowerCase() === statusFilter.toLowerCase();
+
+        return titleMatch && authorMatch && statusMatch;
+    });
+
+    // Limit to a maximum of 10 papers
+    const limitedPapers = filteredPapers.slice(0, 10);
+
+    // Render the filtered papers
+    paperList.innerHTML = limitedPapers.map(paper => `
+        <div class="paper-card">
+            <h3 class="paper-title">${paper.title || 'Untitled'}</h3>
+            <div class="paper-meta">
+                <span><strong>Author:</strong> ${paper.authors || 'Unknown'}</span>
+                <span><strong>Submitted:</strong> ${paper.published_date || 'N/A'}</span>
+            </div>
+            <p>${(paper.summary || 'No abstract available').slice(0, 100)}...</p>
+            <div class="mt-3">
+                <button class="btn btn-primary" onclick="viewPaper(${paper.paperId || 0})">View Details</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function displayConferences(conferences) {
+    const conferenceList = document.querySelector('.conference-list');
+    if (!conferenceList) {
+        console.error('Conference list element not found');
+        return;
+    }
+
+    if (!conferences || conferences.length === 0) {
+        conferenceList.innerHTML = '<p>No conferences found.</p>';
+        return;
+    }
+
+    // Limit to a maximum of 2 conferences
+    const limitedConferences = conferences.slice(0, 2);
+
+    conferenceList.innerHTML = limitedConferences.map(conference => `
+        <div class="conference-card">
+            <h3 class="conference-title">${conference.title || 'Untitled'}</h3>
+            <div class="conference-meta">
+                <span><strong>Date:</strong> ${conference.date ? new Date(conference.date).toLocaleDateString() : 'N/A'}</span>
+                <span><strong>Location:</strong> ${conference.location || 'Unknown'}</span>
+            </div>
+            <p>${conference.description || 'No description available'}</p>
+            <div class="mt-3">
+                <button class="btn btn-primary" onclick="viewConference(${conference.conferenceId || 0})">View Details</button>
             </div>
         </div>
     `).join('');
@@ -161,6 +291,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load papers on dashboard
     if (window.location.pathname === '/dashboard.html') {
+        console.log('Dashboard loaded');
         loadPapers();
+        loadConferences();
     }
 }); 

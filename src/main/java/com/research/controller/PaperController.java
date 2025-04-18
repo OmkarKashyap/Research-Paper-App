@@ -1,43 +1,75 @@
+// package com.research.controller;
+
+// import com.research.service.PaperService;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.http.ResponseEntity;
+// import org.springframework.web.bind.annotation.*;
+// import java.util.Map;
+// import org.springframework.http.HttpStatus;
+
+// @RestController
+// @RequestMapping("/api/papers")
+// @CrossOrigin(origins = "*")
+// public class PaperController {
+
+//     private final PaperService paperService;
+
+//     @Autowired
+//     public PaperController(PaperService paperService) {
+//         this.paperService = paperService;
+//     }
+
+//     @GetMapping("/search")
+//     public ResponseEntity<Map<String, Object>> searchPapers(@RequestParam String topic) {
+//         return ResponseEntity.ok(paperService.searchPapers(topic));
+//     }
+
+//     @GetMapping("/all")
+//     public ResponseEntity<Map<String, Object>> getAllPapers() {
+//         try {
+//             Map<String, Object> papers = paperService.getAllPapers();
+//             return ResponseEntity.ok(papers);
+//         } catch (Exception e) {
+//             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                     .body(Map.of("error", e.getMessage()));
+//         }
+//     }
+// }
+
 package com.research.controller;
 
-import com.research.model.Paper;
-import com.research.model.Author;
 import com.research.service.PaperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/papers")
+@CrossOrigin(origins = "*")
 public class PaperController {
+
+    private final PaperService paperService;
+
     @Autowired
-    private PaperService paperService;
-
-    @PostMapping
-    public ResponseEntity<Paper> submitPaper(@RequestBody Paper paper) {
-        return ResponseEntity.ok(paperService.submitPaper(paper));
+    public PaperController(PaperService paperService) {
+        this.paperService = paperService;
     }
 
-    @GetMapping("/author/{authorId}")
-    public ResponseEntity<List<Paper>> getPapersByAuthor(@PathVariable Author author) {
-        return ResponseEntity.ok(paperService.getPapersByAuthor(author));
+    @GetMapping("/search")
+    public ResponseEntity<Map<String, Object>> searchPapers(@RequestParam String topic) {
+        return ResponseEntity.ok(paperService.searchPapers(topic));
     }
 
-    @GetMapping("/{paperId}")
-    public ResponseEntity<Paper> getPaper(@PathVariable Integer paperId) {
-        return ResponseEntity.ok(paperService.getPaper(paperId));
-    }
-
-    @DeleteMapping("/{paperId}")
-    public ResponseEntity<Void> deletePaper(@PathVariable Integer paperId) {
-        paperService.deletePaper(paperId);
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping
-    public ResponseEntity<List<Paper>> getAllPapers() {
-        return ResponseEntity.ok(paperService.getAllPapers());
+    @GetMapping("/all")
+    public ResponseEntity<Map<String, Object>> getAllPapers() {
+        try {
+            Map<String, Object> papers = paperService.getAllPapers();
+            return ResponseEntity.ok(papers);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 }
