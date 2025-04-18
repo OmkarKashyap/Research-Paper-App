@@ -24,21 +24,28 @@
         <div id="error-message" class="alert alert-danger" style="display: none;"></div>
 
         <div class="card">
-            <h2 class="card-title">Welcome to Your Dashboard</h2>
-            <div class="dashboard-stats">
-                <div class="stat-card">
-                    <h3>Your Papers</h3>
-                    <p id="papers-count">Loading...</p>
-                </div>
-                <div class="stat-card">
-                    <h3>Upcoming Conferences</h3>
-                    <p id="conferences-count">Loading...</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
             <h2 class="card-title">Your Papers</h2>
+            <div class="filter-section">
+                <h3>Filter Papers</h3>
+                <form id="filter-form" onsubmit="applyFilters(event)">
+                    <label for="filter-title">Title:</label>
+                    <input type="text" id="filter-title" placeholder="Enter title">
+
+                    <label for="filter-author">Author:</label>
+                    <input type="text" id="filter-author" placeholder="Enter author">
+
+                    <label for="filter-status">Status:</label>
+                    <select id="filter-status">
+                        <option value="">All</option>
+                        <option value="submitted">Submitted</option>
+                        <option value="draft">Draft</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+
+                    <button type="submit">Apply Filters</button>
+                </form>
+            </div>
             <div class="paper-list">
                 <!-- Papers will be loaded dynamically -->
             </div>
@@ -53,5 +60,25 @@
     </div>
 
     <script src="/js/main.js"></script>
+    <script>
+        async function applyFilters(event) {
+            event.preventDefault();
+
+            // Fetch all papers from the backend
+            const response = await fetch('/api/papers/all', {
+                headers: {
+                    'Authorization': `Bearer ${getToken()}`,
+                },
+            });
+
+            const result = await response.json();
+            if (response.ok && result.data) {
+                filterPapers(result.data); // Call the filterPapers function with the fetched papers
+            } else {
+                const paperList = document.querySelector('.paper-list');
+                paperList.innerHTML = '<p>No papers found.</p>';
+            }
+        }
+    </script>
 </body>
-</html> 
+</html>
