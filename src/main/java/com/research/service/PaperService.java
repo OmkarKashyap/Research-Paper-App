@@ -5,6 +5,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -15,13 +16,16 @@ import java.util.Map;
 @Service
 public class PaperService {
 
+    private final JdbcTemplate jdbcTemplate;
+
     private final RestTemplate restTemplate;
 
     private final String supabaseUrl = "https://pnodilhotdaenfongojd.supabase.co/rest/v1";
     private final String supabaseApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBub2RpbGhvdGRhZW5mb25nb2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMzOTE0MzAsImV4cCI6MjA1ODk2NzQzMH0.t181IckYFVqjpk9IvdlkB3rLmzfaURlMA5GpgDkBI7g";
 
-    public PaperService() {
+    public PaperService(JdbcTemplate jdbcTemplate) {
         this.restTemplate = new RestTemplate();
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     public Map<String, Object> getAllPapers() {
@@ -76,6 +80,56 @@ public class PaperService {
             List<Map<String, Object>> papers = response.getBody();
             result.put("data", papers);
             result.put("total", papers != null ? papers.size() : 0);
+        } catch (Exception e) {
+            result.put("error", "An error occurred: " + e.getMessage());
+        }
+        return result;
+    }
+
+    public Map<String, Object> likePaper(String userId, String paperId) {
+        Map<String, Object> result = new HashMap<>();
+        System.out.println("User ID: " + userId + ", Paper ID: " + paperId);
+        try {
+            // Convert userId to Long (int8 in PostgreSQL), paperId stays as String
+            Long userIdLong = Long.parseLong(userId);
+
+            // Check if the user already liked the paper
+            String checkQuery = "SELECT COUNT(*) FROM user_likes WHERE user_id = ? AND paper_id = ?";
+            int count = jdbcTemplate.queryForObject(checkQuery, Integer.class, userIdLong, paperId);
+
+            if (count > 0) {
+                // Unlike the paper
+                String deleteQuery = "DELETE FROM user_likes WHERE user_id = ? AND paper_id = ?";
+                jdbcTemplate.update(deleteQuery, userIdLong, paperId);
+                result.put("message", "Paper unliked successfully");
+            } else {
+                // Like the paper
+                String insertQuery = "INSERT INTO user_likes (user_id, paper_id) VALUES (?, ?)";
+                jdbcTemplate.update(insertQuery, userIdLong, paperId);
+                result.put("message", "Paper liked successfully");
+            }
+
+            result.put("success", true);
+        } catch (NumberFormatException e) {
+            result.put("success", false);
+            result.put("error", "Invalid user ID format. Must be a number.");
+        } catch (Exception e) {
+            System.err.println("Error in likePaper: " + e.getMessage());
+            result.put("success", false);
+            result.put("error", "An error occurred: " + e.getMessage());
+        }
+
+        return result;
+    }
+
+    public Map<String, Object> getLikedPapers(int userId) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            String query = "SELECT p.* FROM papers p INNER JOIN user_likes ul ON p.paper_id = ul.paper_id WHERE ul.user_id = ?";
+            List<Map<String, Object>> likedPapers = jdbcTemplate.queryForList(query, userId);
+
+            result.put("data", likedPapers);
+            result.put("total", likedPapers.size());
         } catch (Exception e) {
             result.put("error", "An error occurred: " + e.getMessage());
         }

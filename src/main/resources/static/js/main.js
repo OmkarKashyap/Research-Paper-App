@@ -131,7 +131,9 @@ function displayPapers(papers) {
             </div>
            <p>${(paper.summary || 'No abstract available').slice(0, 100)}...</p>
             <div class="mt-3">
-                <button class="btn btn-primary" onclick="viewPaper(${paper.paperId || 0})">View Details</button>
+                <span>${paper.id}</span>
+                <button class="btn btn-primary" onclick="viewPaper(${paper.id})">View Details</button>
+                <button class="btn btn-secondary" onclick="toggleLike('${paper.id}')">Like</button>
             </div>
         </div>
     `).join('');
@@ -180,6 +182,91 @@ function filterPapers(papers) {
         </div>
     `).join('');
 }
+
+async function toggleLike(paperId) {
+    
+
+    console.log("Toggling like for paperId:", paperId); // Debugging log
+    
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user_id = String(user.id);
+    console.log("Toggling like for userID:", user);
+    console.log("Type of user:", typeof user_id);
+    if (!user || !user.id) {
+        showError('User not logged in');
+        return;
+    }
+    console.log("Toggling like for userID:", user_id); // Debugging log
+    try {
+        const response = await fetch(`${API_BASE_URL}/papers/${paperId}/like`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'userId':user_id,
+                'Authorization': `Bearer ${getToken()}`,
+            },
+        });
+
+        const result = await response.json();
+        console.log("API Response:", result); // Debugging log
+
+        if (response.ok && result.success) {
+            showSuccess(result.message || 'Paper liked/unliked successfully');
+            // Optionally reload papers or update the UI dynamically
+            loadPapers(); // Refresh the paper list
+        } else {
+            showError(result.error || 'Failed to like/unlike the paper');
+        }
+    } catch (error) {
+        console.error("Error in toggleLike:", error); // Debugging log
+        showError('An error occurred while liking the paper');
+    }
+}
+
+// Function to load liked papers
+async function loadLikedPapers() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/papers/liked`, {
+            headers: {
+                'Authorization': `Bearer ${getToken()}`,
+            },
+        });
+        const result = await response.json();
+        if (response.ok && result.data) {
+            displayLikedPapers(result.data);
+        } else {
+            showError('No liked papers found');
+        }
+    } catch (error) {
+        showError('An error occurred while loading liked papers');
+    }
+}
+
+// Function to display liked papers
+function displayLikedPapers(papers) {
+    const likedPaperList = document.querySelector('.liked-paper-list');
+    if (!likedPaperList) {
+        console.error('Liked paper list element not found');
+        return;
+    }
+
+    if (!papers || papers.length === 0) {
+        likedPaperList.innerHTML = '<p>No liked papers found.</p>';
+        return;
+    }
+
+    likedPaperList.innerHTML = papers.map(paper => `
+        <div class="paper-card">
+            <h3 class="paper-title">${paper.title || 'Untitled'}</h3>
+            <div class="paper-meta">
+                <span><strong>Author:</strong> ${paper.authors || 'Unknown'}</span>
+                <span><strong>Submitted:</strong> ${paper.published_date || 'N/A'}</span>
+            </div>
+            <p>${(paper.summary || 'No abstract available').slice(0, 100)}...</p>
+        </div>
+    `).join('');
+}
+
 
 function displayConferences(conferences) {
     const conferenceList = document.querySelector('.conference-list');
