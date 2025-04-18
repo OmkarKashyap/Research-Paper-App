@@ -1,36 +1,84 @@
 package com.research.service;
 
-import com.research.model.Paper;
-import com.research.model.Author;
-import com.research.repository.PaperRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PaperService {
-    @Autowired
-    private PaperRepository paperRepository;
 
-    public Paper submitPaper(Paper paper) {
-        return paperRepository.save(paper);
+    private final RestTemplate restTemplate;
+
+    private final String supabaseUrl = "https://pnodilhotdaenfongojd.supabase.co/rest/v1";
+    private final String supabaseApiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBub2RpbGhvdGRhZW5mb25nb2pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMzOTE0MzAsImV4cCI6MjA1ODk2NzQzMH0.t181IckYFVqjpk9IvdlkB3rLmzfaURlMA5GpgDkBI7g";
+
+    public PaperService() {
+        this.restTemplate = new RestTemplate();
     }
 
-    public List<Paper> getPapersByAuthor(Author author) {
-        return paperRepository.findByAuthor(author);
+    public Map<String, Object> getAllPapers() {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            String url = supabaseUrl + "/papers";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("apikey", supabaseApiKey);
+            headers.set("Authorization", "Bearer " + supabaseApiKey);
+            headers.set("Accept", "application/json");
+            headers.set("Prefer", "return=representation");
+
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<>() {
+                    });
+
+            List<Map<String, Object>> papers = response.getBody();
+            result.put("data", papers);
+            result.put("total", papers != null ? papers.size() : 0);
+        } catch (Exception e) {
+            result.put("error", "An error occurred: " + e.getMessage());
+        }
+        return result;
     }
 
-    public Paper getPaper(Integer paperId) {
-        return paperRepository.findById(paperId)
-                .orElseThrow(() -> new RuntimeException("Paper not found"));
-    }
+    public Map<String, Object> searchPapers(String topic) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            String url = supabaseUrl + "/papers?topic=ilike.%25" + topic + "%25&select=*";
 
-    public void deletePaper(Integer paperId) {
-        paperRepository.deleteById(paperId);
-    }
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("apikey", supabaseApiKey);
+            headers.set("Authorization", "Bearer " + supabaseApiKey);
+            headers.set("Accept", "application/json");
+            headers.set("Prefer", "return=representation");
 
-    public List<Paper> getAllPapers() {
-        return paperRepository.findAll();
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<>() {
+                    });
+
+            List<Map<String, Object>> papers = response.getBody();
+            result.put("data", papers);
+            result.put("total", papers != null ? papers.size() : 0);
+        } catch (Exception e) {
+            result.put("error", "An error occurred: " + e.getMessage());
+        }
+        return result;
     }
 }
