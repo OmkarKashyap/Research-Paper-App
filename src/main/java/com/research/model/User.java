@@ -26,6 +26,9 @@ public class User {
     @Column(nullable = false)
     private String role; // New field for storing user role (e.g., ADMIN, USER)
 
+    public Long getId() {
+        return id;
+    }
     public String getName() {
         return name;
     }
