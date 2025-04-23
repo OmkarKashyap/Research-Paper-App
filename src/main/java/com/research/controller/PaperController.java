@@ -68,4 +68,36 @@ public class PaperController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
+
+    @GetMapping("/view/{id}")
+    public ResponseEntity<Map<String, Object>> getPaperById(@PathVariable("id") String id) {
+        Map<String, Object> result = paperService.getPaperById(id);
+        System.out.println("Received paperId: " + id); // Debugging log
+
+        if (result != null) {
+            System.out.println("Received paperId: " + id); // Debugging log
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
+        }
+    }
+
+    @PostMapping("/{paperId}/comment")
+public ResponseEntity<Map<String, Object>> addComment(
+        @PathVariable("paperId") String paperId,
+        @RequestBody Map<String, String> requestBody,
+        @RequestHeader("userId") String userId) {
+
+    String commentText = requestBody.get("comment");
+    System.out.println(commentText);
+
+    if (commentText == null || commentText.trim().isEmpty()) {
+        return ResponseEntity.badRequest().body(Map.of("success", false, "error", "Comment cannot be empty"));
+    }
+
+    Map<String, Object> response = paperService.addComment(paperId, userId, commentText);
+    System.out.println(response);
+    return ResponseEntity.ok(response);
+}
+
 }

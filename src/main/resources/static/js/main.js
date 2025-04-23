@@ -132,8 +132,8 @@ function displayPapers(papers) {
            <p>${(paper.summary || 'No abstract available').slice(0, 100)}...</p>
             <div class="mt-3">
                 <span>${paper.id}</span>
-                <button class="btn btn-primary" onclick="viewPaper(${paper.id})">View Details</button>
-                <button class="btn btn-secondary" onclick="toggleLike('${paper.id}')">Like</button>
+                <button class="btn btn-primary" onclick="viewPaper('${encodeURIComponent(paper.id || 0)}')">View Details</button>
+                <button class="btn btn-secondary" onclick="toggleLike('${encodeURIComponent(paper.id)}')">Like</button>
             </div>
         </div>
     `).join('');
@@ -177,7 +177,8 @@ function filterPapers(papers) {
             </div>
             <p>${(paper.summary || 'No abstract available').slice(0, 100)}...</p>
             <div class="mt-3">
-                <button class="btn btn-primary" onclick="viewPaper(${paper.paperId || 0})">View Details</button>
+                <button class="btn btn-primary" onclick="viewPaper('${encodeURIComponent(paper.id || 0)}')">View Details</button>
+                <button class="btn btn-secondary" onclick="toggleLike('${encodeURIComponent(paper.id)}')">Like</button>
             </div>
         </div>
     `).join('');
@@ -267,6 +268,14 @@ function displayLikedPapers(papers) {
     `).join('');
 }
 
+function viewPaper(paperId) {
+    if (paperId) {
+        // Redirect to the new page with paperId as query parameter
+        window.location.href = `/paper-details.html?id=${paperId}`;
+    } else {
+        alert("Invalid paper ID");
+    }
+}
 
 function displayConferences(conferences) {
     const conferenceList = document.querySelector('.conference-list');

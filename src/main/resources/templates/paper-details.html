@@ -37,7 +37,7 @@
                         <label for="comment" class="form-label">Add a Comment</label>
                         <textarea id="comment" class="form-control" rows="3" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">Submit Comment</button>
+                    <button type="submit" class="btn btn-primary" onclick="submitComment()">Submit Comment</button>
                 </form>
 
                 <div id="comments-list">
@@ -77,15 +77,94 @@
 
     <script src="/js/main.js"></script>
     <script>
-        // Load paper details and comments when the page loads
+        const paperId = new URLSearchParams(window.location.search).get("id");
         document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const paperId = urlParams.get('id');
-            if (paperId) {
-                loadPaperDetails(paperId);
-                loadComments(paperId);
+            
+            if (!paperId) {
+                document.getElementById("paper-container").innerHTML = "<p>No paper ID found in URL.</p>";
+                return;
             }
+
+            fetch(`/api/papers/view/${paperId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.paper) {
+                        renderPaper(data.paper);
+                    } else {
+                        document.getElementById("paper-container").innerHTML =
+                            `<p>Error: ${data.error}</p>`;
+                    }
+                }).catch(err => {
+                    document.getElementById("paper-container").innerHTML =
+                        `<p>Failed to load paper.</p>`;
+                });
         });
+
+        function renderPaper(paper) {
+            const container = document.getElementById("paper-details");
+            let paperHtml = `
+        <h1>${paper.title}</h1>
+        <p><strong>Authors:</strong> ${paper.authors}</p>
+        <p><strong>Topic:</strong> ${paper.topic}</p>
+        <p><strong>Abstract:</strong> ${paper.abstract_text}</p>
+        <p><strong>Summary:</strong> ${paper.summary}</p>
+        <p><strong>Link:</strong> <a href="${paper.link}" target="_blank">${paper.link}</a></p>
+    `;
+
+    // Render comments if any
+    if (Array.isArray(paper.comments) && paper.comments.length > 0) {
+        paperHtml += `<h3 class="mt-4">Comments</h3><div id="comments-list">`;
+        paper.comments.forEach(commentObj => {
+            const userId = Object.keys(commentObj)[0];
+            const commentText = commentObj[userId];
+            paperHtml += `<div><strong>User ${userId}:</strong> ${commentText}</div>`;
+        });
+        paperHtml += `</div>`;
+    } else {
+        paperHtml += `<h3 class="mt-4">Comments</h3><div id="comments-list">No comments yet.</div>`;
+    }
+
+    container.innerHTML = paperHtml;
+        }
+    function submitComment() {
+
+    const commentInput = document.getElementById("comment");
+    const comment = commentInput.value.trim();
+    const paperId = new URLSearchParams(window.location.search).get("id");
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const user_id = String(user.id);
+
+    if (!comment) {
+        alert("Comment cannot be empty!");
+        return;
+    }
+
+    fetch(`/api/papers/${paperId}/comment`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "userId": user_id,
+        },
+        body: JSON.stringify({ comment })
+    })
+    .then(res => res.json()).then(data => {
+        if (data.success) {
+            const commentList = document.getElementById("comments-list");
+            const newComment = document.createElement("div");
+            newComment.innerHTML = `<strong>User ${user_id}:</strong> ${comment}`;
+            commentList.appendChild(newComment);
+            commentInput.value = ""; // clear the textarea
+        } else {
+            alert("Failed to add comment: " + data.error);
+        }
+    })
+    .catch(err => {
+        console.error("Error submitting comment:", err);
+    // alert("Something went wrong. Reloading page...");
+    print(paperId)
+    window.location.href = `/paper-details.html?id=${paperId}`;
+    });
+}
     </script>
 </body>
 </html> 

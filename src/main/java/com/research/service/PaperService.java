@@ -85,6 +85,54 @@ public class PaperService {
         }
         return result;
     }
+    public Map<String, Object> getPaperById(String paperId) {
+    Map<String, Object> result = new HashMap<>();
+    try {
+        String url = supabaseUrl + "/papers?id=eq." + paperId + "&select=*";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("apikey", supabaseApiKey);
+        headers.set("Authorization", "Bearer " + supabaseApiKey);
+        headers.set("Accept", "application/json");
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                new ParameterizedTypeReference<>() {
+                });
+
+        List<Map<String, Object>> papers = response.getBody();
+        if (papers != null && !papers.isEmpty()) {
+             System.out.println("Fetched paper: " + papers.get(0));
+            result.put("paper", papers.get(0));
+        } else {
+            result.put("error", "Paper not found");
+        }
+    } catch (Exception e) {
+        result.put("error", "An error occurred: " + e.getMessage());
+    }
+    return result;
+}
+    public Map<String, Object> addComment(String paperId, String userId, String commentText) {
+    Map<String, Object> result = new HashMap<>();
+    try {
+        String jsonComment = String.format("{\"%s\": \"%s\"}", userId, commentText);
+        System.out.println(jsonComment);
+        String query = "UPDATE papers SET comments = array_append(comments, ?::jsonb) WHERE id = ?";
+        jdbcTemplate.update(query, jsonComment, paperId);
+
+        result.put("success", true);
+        result.put("message", "Comment added successfully");
+    } catch (Exception e) {
+        result.put("success", false);
+        result.put("error", e.getMessage());
+    }
+    return result;
+}
+
 
     public Map<String, Object> likePaper(String userId, String paperId) {
         Map<String, Object> result = new HashMap<>();
