@@ -173,7 +173,7 @@ public class PaperService {
     public Map<String, Object> getLikedPapers(int userId) {
         Map<String, Object> result = new HashMap<>();
         try {
-            String query = "SELECT p.* FROM papers p INNER JOIN user_likes ul ON p.paper_id = ul.paper_id WHERE ul.user_id = ?";
+            String query = "SELECT p.* FROM papers p INNER JOIN user_likes ul ON p.id = ul.paper_id WHERE ul.user_id = ?";
             List<Map<String, Object>> likedPapers = jdbcTemplate.queryForList(query, userId);
 
             result.put("data", likedPapers);

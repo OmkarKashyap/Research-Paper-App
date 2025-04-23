@@ -102,13 +102,14 @@
 
         function renderPaper(paper) {
             const container = document.getElementById("paper-details");
+            const arxivUrl = `https://arxiv.org/abs/${paper.id.replace("abs-", "")}`;
             let paperHtml = `
         <h1>${paper.title}</h1>
         <p><strong>Authors:</strong> ${paper.authors}</p>
         <p><strong>Topic:</strong> ${paper.topic}</p>
         <p><strong>Abstract:</strong> ${paper.abstract_text}</p>
         <p><strong>Summary:</strong> ${paper.summary}</p>
-        <p><strong>Link:</strong> <a href="${paper.link}" target="_blank">${paper.link}</a></p>
+        <p><strong>Link:</strong> <a href="${arxivUrl}" target="_blank">ArXiv Link</a></p>
     `;
 
     // Render comments if any

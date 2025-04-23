@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container container">
+            <a href="/" class="navbar-brand">Research Conference</a>
+            <ul class="navbar-nav">
+                <li><a href="/dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="/submit-paper.html" class="nav-link">Submit Paper</a></li>
+                <li><a href="/profile.html" class="nav-link">Profile</a></li>
+                <li><a href="#" class="nav-link" onclick="logout()">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div id="profile-container">
+        <h1>User Profile</h1>
+        <div id="profile-details"></div>
+        <h2>Liked Papers</h2>
+<div id="liked-papers"></div>
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+            if (!user.id) {
+                document.getElementById("profile-details").innerHTML = `
+                    <p>No user is logged in.</p>
+                    <a href="login.html">Go to login</a>
+                `;
+                return;
+            }
+
+            document.getElementById("profile-details").innerHTML = `
+                <p><strong>ID:</strong> ${user.id}</p>
+                <p><strong>Name:</strong> ${user.name}</p>
+                <p><strong>Email:</strong> ${user.email}</p>
+            `;
+            fetch(`/api/users/${user.id}/liked-papers`)
+    .then(res => res.json())
+    .then(response => {
+        const likedContainer = document.getElementById("liked-papers");
+        const papers = response.data;
+
+        if (!papers || papers.length === 0) {
+            likedContainer.innerHTML = "<p>No liked papers yet.</p>";
+        } else {
+            likedContainer.innerHTML = ""; // Clear existing content
+            papers.forEach(paper => {
+                likedContainer.innerHTML += `
+                    <div class="paper-card">
+                        <h4>${paper.title}</h4>
+                        <p><strong>Authors:</strong> ${paper.authors}</p>
+                        <p><strong>Topic:</strong> ${paper.category}</p>
+                        <a href="paper-details.html?id=${paper.id}">View Details</a>
+                    </div>
+                `;
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error fetching liked papers:", error);
+        document.getElementById("liked-papers").innerHTML = "<p>Error loading liked papers.</p>";
+    });
+
+        });
+    </script>
+</body>
+</html>

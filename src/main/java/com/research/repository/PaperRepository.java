@@ -11,7 +11,6 @@
 // } 
 
 package com.research.repository;
-
 import com.research.model.Paper;
 import org.springframework.data.jpa.repository.JpaRepository;
 

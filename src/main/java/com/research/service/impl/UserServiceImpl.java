@@ -1,7 +1,10 @@
 package com.research.service.impl;
 
 import com.research.model.User;
+import java.util.List;
+import com.research.model.Paper;
 import com.research.repository.UserRepository;
+import com.research.repository.PaperRepository;
 import com.research.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,10 +17,14 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PaperRepository paperRepository; // Inject paper repo
 
-    @Autowired
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+     @Autowired
+    public UserServiceImpl(UserRepository userRepository,
+                           PaperRepository paperRepository,
+                           PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.paperRepository = paperRepository;
         this.passwordEncoder = passwordEncoder;
     }
 

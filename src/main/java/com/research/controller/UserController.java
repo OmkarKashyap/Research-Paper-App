@@ -1,9 +1,13 @@
 package com.research.controller;
+import java.util.List;
+import com.research.model.Paper;
 
 import com.research.model.LoginRequest;
 import com.research.model.User;
+import com.research.model.Paper;
 import com.research.service.JwtService;
 import com.research.service.UserService;
+import com.research.service.PaperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +23,9 @@ import java.util.Map;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PaperService paperService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -45,7 +52,12 @@ public class UserController {
         return user.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
-
+@GetMapping("{userId}/liked-papers")
+public ResponseEntity<Map<String, Object>> getLikedPapersByUser(@PathVariable int userId) {
+    Map<String, Object> likedPapers = paperService.getLikedPapers(userId);
+    System.out.println(likedPapers);
+    return ResponseEntity.ok(likedPapers);
+}
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody LoginRequest loginRequest) {
         User user = userService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
@@ -65,7 +77,6 @@ public class UserController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid credentials"));
         }
-
         // public ResponseEntity<?> authenticateUser(@RequestBody User user) {
         // Optional<User> existingUser = userService.findByEmail(user.getEmail());
 
